@@ -119,7 +119,16 @@ export function isMersennePrime(n: anyint) {
     return bs == 0;
 }
 /**
- * @param n
+ * Checks if `n` is a prime.
+ * Returns a pair of `boolean`s in an array.
+ * - `[0]` is primarity.  `true` if prime, `false` if composite
+ * - `[1]` is certainity. 
+ *   - `true` if the result is 100% sure.  
+ *   - `false` if the result is probable.
+ * - `[2]` (optional) the number of Miller-Rabin Tests applied.
+ * @param {anyint} n integer to check primarity
+ * @param {number} nmrt maximum number of Miller-Rabin Tests to apply
+ * @returns {boolean[]} `[primarity, certaininty]`
  */
 export function isProbablyPrime(n: anyint, nmrt = 0) {
     if (typeof n === 'number') {
@@ -150,15 +159,25 @@ export function isProbablyPrime(n: anyint, nmrt = 0) {
     return [true, false, k];
 }
 /**
- * @param n 
+ * Checks if `n` is a prime.  If not certain throws a `RangeError`.
+ * If you want to check what hass happen
+ * @param {anyint} n integer to check primarity
  */
 export function isPrime(n: anyint) {
-    const [prime, sure] = isProbablyPrime(n)
-    if (sure) return prime;
-    throw RangeError(`${n} is probably${prime ? ' ' : ' not '}a prime but not for sure.`);
+    const [primarity, certainity] = isProbablyPrime(n)
+    if (certainity) return primarity;
+    throw RangeError(
+        `${n} is probably${primarity ? ' ' : ' not '}a prime` 
+        + ' but not for sure.'
+    );
 }
 /**
- * @param n 
+ * find the next prime.
+ * 
+ * @param {anyint} n the starting integer.
+ * @param {boolean} unsure if `true` probable primes become accepted.
+ * @param {number} nmrt the number of Miller-Rabin Tests to apply.
+ * @returns {anyint} the next prime number or `undefined` if not found
  */
 export function nextPrime(n: anyint, unsure = false, nmrt = 0): anyint {
     const ctor = n.constructor;
@@ -177,7 +196,12 @@ export function nextPrime(n: anyint, unsure = false, nmrt = 0): anyint {
     }
 }
 /**
- * @param n 
+ * find the previous prime.
+ * 
+ * @param {anyint} n the starting integer.
+ * @param {boolean} unsure if `true` probable primes become accepted.
+ * @param {number} nmrt the number of Miller-Rabin Tests to apply.
+ * @returns {anyint} the previous prime number or `undefined` if not found
  */
 export function previousPrime(n: anyint, unsure = false, nmrt = 0): anyint {
     if (n < 2) return undefined
@@ -206,13 +230,16 @@ export function* primes(n = Number.POSITIVE_INFINITY) {
     for (let p = ctor(2), i = 0; i < n; i++, p = nextPrime(p)) yield p;
 }
 /**
- * generates primes where `begin <= p < end`
+ * generates primes where `begin <= p <= end`
  */
-export function* primesBetween(begin: anyint = 2, end: anyint = Number.POSITIVE_INFINITY) {
-    if (end < begin) return primesBetween(end, begin);
-    let p = isPrime(begin) ? begin : nextPrime(begin);
-    while (p < end) {
+export function* primesBetween(
+    begin: anyint = 2, end: anyint = Number.POSITIVE_INFINITY,
+    unsure = false, nmrt = 0
+) {
+    if (end < begin) return primesBetween(end, begin, unsure, nmrt);
+    let p = isPrime(begin) ? begin : nextPrime(begin, unsure, nmrt);
+    while (p <= end) {
         yield p;
-        p = nextPrime(p)
+        p = nextPrime(p, unsure, nmrt)
     }
 }

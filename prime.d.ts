@@ -28,19 +28,40 @@ export declare const millerRabinTests: Map<any, any>;
  */
 export declare function isMersennePrime(n: anyint): boolean;
 /**
- * @param n
+ * Checks if `n` is a prime.
+ * Returns a pair of `boolean`s in an array.
+ * - `[0]` is primarity.  `true` if prime, `false` if composite
+ * - `[1]` is certainity.
+ *   - `true` if the result is 100% sure.
+ *   - `false` if the result is probable.
+ * - `[2]` (optional) the number of Miller-Rabin Tests applied.
+ * @param {anyint} n integer to check primarity
+ * @param {number} nmrt maximum number of Miller-Rabin Tests to apply
+ * @returns {boolean[]} `[primarity, certaininty]`
  */
 export declare function isProbablyPrime(n: anyint, nmrt?: number): (number | boolean)[];
 /**
- * @param n
+ * Checks if `n` is a prime.  If not certain throws a `RangeError`.
+ * If you want to check what hass happen
+ * @param {anyint} n integer to check primarity
  */
 export declare function isPrime(n: anyint): number | boolean;
 /**
- * @param n
+ * find the next prime.
+ *
+ * @param {anyint} n the starting integer.
+ * @param {boolean} unsure if `true` probable primes become accepted.
+ * @param {number} nmrt the number of Miller-Rabin Tests to apply.
+ * @returns {anyint} the next prime number or `undefined` if not found
  */
 export declare function nextPrime(n: anyint, unsure?: boolean, nmrt?: number): anyint;
 /**
- * @param n
+ * find the previous prime.
+ *
+ * @param {anyint} n the starting integer.
+ * @param {boolean} unsure if `true` probable primes become accepted.
+ * @param {number} nmrt the number of Miller-Rabin Tests to apply.
+ * @returns {anyint} the previous prime number or `undefined` if not found
  */
 export declare function previousPrime(n: anyint, unsure?: boolean, nmrt?: number): anyint;
 /**
@@ -50,7 +71,7 @@ export declare function previousPrime(n: anyint, unsure?: boolean, nmrt?: number
  */
 export declare function primes(n?: number): Generator<any, void, unknown>;
 /**
- * generates primes where `begin <= p < end`
+ * generates primes where `begin <= p <= end`
  */
-export declare function primesBetween(begin?: anyint, end?: anyint): any;
+export declare function primesBetween(begin?: anyint, end?: anyint, unsure?: boolean, nmrt?: number): any;
 export {};
