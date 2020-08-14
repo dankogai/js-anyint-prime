@@ -119,7 +119,7 @@ export function isMersennePrime(n) {
 /**
  * @param n
  */
-export function isProbablyPrime(n) {
+export function isProbablyPrime(n, nmrt = 0) {
     if (typeof n === 'number') {
         if (!Number.isInteger(n))
             return [false, true];
@@ -150,7 +150,7 @@ export function isProbablyPrime(n) {
     if (mp !== undefined)
         return [mp, true];
     // try more till n < (4 ** k) <=> k > log(n) / log(2) == lg(2) / 2;
-    const k = Math.ceil(n.toString(4).length);
+    const k = nmrt || Math.ceil(n.toString(4).length);
     for (let i = A014233.size, p = nextPrime(41); i < k; i++, p = nextPrime(p)) {
         if (millerRabinTest(Number(p))(bn) === false)
             return [false, true];
@@ -170,7 +170,7 @@ export function isPrime(n) {
 /**
  * @param n
  */
-export function nextPrime(n) {
+export function nextPrime(n, unsure = false, nmrt = 0) {
     const ctor = n.constructor;
     const [zero, one, two] = [ctor(0), ctor(1), ctor(2)];
     let bp = n < two ? two
@@ -182,8 +182,8 @@ export function nextPrime(n) {
     if (bp % two === zero)
         bp++;
     while (true) {
-        const [prime, sure] = isProbablyPrime(bp);
-        if (!sure)
+        const [prime, sure] = isProbablyPrime(bp, nmrt);
+        if (!sure && !unsure)
             return undefined;
         if (prime)
             return ctor(bp);
@@ -193,7 +193,7 @@ export function nextPrime(n) {
 /**
  * @param n
  */
-export function previousPrime(n) {
+export function previousPrime(n, unsure = false, nmrt = 0) {
     if (n < 2)
         return undefined;
     const ctor = n.constructor;
@@ -206,8 +206,8 @@ export function previousPrime(n) {
     if (bp % two === zero)
         bp--;
     while (2 <= bp) {
-        const [prime, sure] = isProbablyPrime(bp);
-        if (!sure)
+        const [prime, sure] = isProbablyPrime(bp, nmrt);
+        if (!sure && !unsure)
             return undefined;
         if (prime)
             return ctor(bp);

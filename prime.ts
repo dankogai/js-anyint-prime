@@ -14,12 +14,13 @@ const _BI = typeof BigInt === 'function' ? BigInt : Number;
 //
 const halve = typeof BigInt === 'function'
     ? n => n.constructor(_BI(n) >> _BI(1))
-    : n => n.constructor(Math.floor(n/2));
+    : n => n.constructor(Math.floor(n / 2));
 /**
  * 
  */
 export const mulmod = typeof BigInt === 'function'
-    ? (a: anyint, b: anyint, m: anyint) => a.constructor((_BI(a) * _BI(b)) % _BI(m))
+    ? (a: anyint, b: anyint, m: anyint) =>
+        a.constructor((_BI(a) * _BI(b)) % _BI(m))
     : (a: number, b: number, m: number) => {
         let r = 0;
         a %= m
@@ -28,7 +29,7 @@ export const mulmod = typeof BigInt === 'function'
             a = (a * 2) % m;
             b = Math.floor(b / 2);
         }
-       return r;
+        return r;
     };
 /**
  * @param b base
@@ -120,7 +121,7 @@ export function isMersennePrime(n: anyint) {
 /**
  * @param n
  */
-export function isProbablyPrime(n: anyint) {
+export function isProbablyPrime(n: anyint, nmrt = 0) {
     if (typeof n === 'number') {
         if (!Number.isInteger(n)) return [false, true];
         if (Number.MAX_SAFE_INTEGER < n) return [false, false];
@@ -141,7 +142,7 @@ export function isProbablyPrime(n: anyint) {
     const mp = isMersennePrime(bn);
     if (mp !== undefined) return [mp, true];
     // try more till n < (4 ** k) <=> k > log(n) / log(2) == lg(2) / 2;
-    const k = Math.ceil(n.toString(4).length);
+    const k = nmrt || Math.ceil(n.toString(4).length);
     for (let i = A014233.size, p = nextPrime(41); i < k; i++, p = nextPrime(p)) {
         if (millerRabinTest(Number(p))(bn) === false) return [false, true];
     }
@@ -159,7 +160,7 @@ export function isPrime(n: anyint) {
 /**
  * @param n 
  */
-export function nextPrime(n: anyint): anyint {
+export function nextPrime(n: anyint, unsure = false, nmrt = 0): anyint {
     const ctor = n.constructor;
     const [zero, one, two] = [ctor(0), ctor(1), ctor(2)];
     let bp = n < two ? two
@@ -169,8 +170,8 @@ export function nextPrime(n: anyint): anyint {
     if (bp === two) return ctor(two);
     if (bp % two === zero) bp++;
     while (true) {
-        const [prime, sure] = isProbablyPrime(bp);
-        if (!sure) return undefined;
+        const [prime, sure] = isProbablyPrime(bp, nmrt);
+        if (!sure && !unsure) return undefined;
         if (prime) return ctor(bp);
         bp += two;
     }
@@ -178,7 +179,7 @@ export function nextPrime(n: anyint): anyint {
 /**
  * @param n 
  */
-export function previousPrime(n: anyint): anyint {
+export function previousPrime(n: anyint, unsure = false, nmrt = 0): anyint {
     if (n < 2) return undefined
     const ctor = n.constructor;
     const [zero, one, two] = [ctor(0), ctor(1), ctor(2)];
@@ -188,8 +189,8 @@ export function previousPrime(n: anyint): anyint {
     if (bp === two) return ctor(two);
     if (bp % two === zero) bp--;
     while (2 <= bp) {
-        const [prime, sure] = isProbablyPrime(bp);
-        if (!sure) return undefined;
+        const [prime, sure] = isProbablyPrime(bp, nmrt);
+        if (!sure && !unsure) return undefined;
         if (prime) return ctor(bp);
         bp -= two;
     }

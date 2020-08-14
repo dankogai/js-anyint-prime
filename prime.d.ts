@@ -30,7 +30,7 @@ export declare function isMersennePrime(n: anyint): boolean;
 /**
  * @param n
  */
-export declare function isProbablyPrime(n: anyint): (number | boolean)[];
+export declare function isProbablyPrime(n: anyint, nmrt?: number): (number | boolean)[];
 /**
  * @param n
  */
@@ -38,11 +38,11 @@ export declare function isPrime(n: anyint): number | boolean;
 /**
  * @param n
  */
-export declare function nextPrime(n: anyint): anyint;
+export declare function nextPrime(n: anyint, unsure?: boolean, nmrt?: number): anyint;
 /**
  * @param n
  */
-export declare function previousPrime(n: anyint): anyint;
+export declare function previousPrime(n: anyint, unsure?: boolean, nmrt?: number): anyint;
 /**
  * generates `n` primes.
  * If `n` is `BigInt`, generated primes are also `BigInt`.
