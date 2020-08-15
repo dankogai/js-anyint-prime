@@ -27,6 +27,9 @@ export declare const millerRabinTests: Map<any, any>;
  *
  */
 export declare function isMersennePrime(n: anyint): boolean;
+export declare function isqrt(n: anyint): any;
+export declare function jacobiSymbol(m: anyint, i: number): number;
+export declare function isLucasProbablePrime(x: any): boolean;
 /**
  * Checks if `n` is a prime.
  * Returns a pair of `boolean`s in an array.

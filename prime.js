@@ -116,6 +116,109 @@ export function isMersennePrime(n) {
     }
     return bs == 0;
 }
+export function isqrt(n) {
+    if (typeof n === 'number')
+        return Math.floor(Math.sqrt(n));
+    const $ = n.constructor;
+    if (n == $(0))
+        return $(0);
+    if (n == $(1))
+        return $(1);
+    let xk = n;
+    while (true) {
+        let xk1 = (xk + n / xk) >> $(1);
+        if (xk <= xk1)
+            return xk;
+        xk = xk1;
+    }
+}
+export function jacobiSymbol(m, i) {
+    const $ = m.constructor;
+    var j = 1;
+    var n = $(i < 0 ? -i : i);
+    if (m <= 0 || $(m) % $(2) == $(0)) {
+        return 0;
+    }
+    if (i < 0 && $(m) % $(4) == $(3)) {
+        j = -j;
+    }
+    while (n != $(0)) {
+        while (n % $(2) == $(0)) {
+            n >>= $(1);
+            if ($(m) % $(8) == $(3) || $(m) % $(8) == $(5)) {
+                j = -j;
+            }
+        }
+        [m, n] = [n, m];
+        if ($(n) % $(4) == $(3) && $(m) % $(4) == $(3)) {
+            j = -j;
+        }
+        n %= $(m);
+    }
+    return (m === $(1)) ? j : 0;
+}
+export function isLucasProbablePrime(x) {
+    const $ = x.constructor;
+    // make sure self is not a perfect square
+    const r = isqrt(x);
+    if (r * r == x) {
+        return false;
+    }
+    let d = (() => {
+        let d = 1;
+        for (let i = 2, s = 1; i < 256; i++, s *= -1) { // 256 is arbitrary
+            d = s * (2 * i + 1);
+            if (jacobiSymbol(x, d) === -1)
+                return d;
+        }
+        ;
+        throw Error("no such d found that jacobiSymbol(n, d) == -1");
+    })();
+    // return d;
+    let p = 1;
+    let q = _BI(1 - d) / _BI(4);
+    // print("p = \(p), q = \(q)")
+    let n = (_BI(x) + _BI(1)) >> _BI(1);
+    // print("n = \(n)")
+    let [u, v] = [_BI(0), _BI(2)];
+    let [u2, v2] = [_BI(1), _BI(p)];
+    let q2 = _BI(2) * q;
+    let [bs, bd] = [_BI(x), _BI(d)];
+    while (_BI(0) < n) {
+        // u2 = (u2 * v2) % bs
+        u2 *= v2;
+        u2 %= bs;
+        // v2 = (v2 * v2 - q2) % bs
+        v2 *= v2;
+        v2 -= q2;
+        v2 %= bs;
+        if (n % _BI(2) === _BI(1)) {
+            let t = u;
+            // u = u2 * v + u * v2
+            u *= v2;
+            u += u2 * v;
+            u += u % _BI(2) === _BI(0) ? _BI(0) : bs;
+            // u = (u / 2) % bs
+            u /= _BI(2);
+            u %= bs;
+            // v = (v2 * v) + (u2 * t * bd)
+            v *= v2;
+            v += u2 * t * bd;
+            v += v % _BI(2) === _BI(0) ? _BI(0) : bs;
+            // v = (v / 2) % bs
+            v /= _BI(2);
+            v %= bs;
+        }
+        // q = (q * q) % bs
+        q *= q;
+        q %= bs;
+        // q2 = q + q
+        q2 = q << _BI(1);
+        // print(u, v)
+        n >>= _BI(1);
+    }
+    return u === _BI(0);
+}
 /**
  * Checks if `n` is a prime.
  * Returns a pair of `boolean`s in an array.
@@ -147,6 +250,16 @@ export function primarityTest(n, nmrt = 0) {
         return [bn === b5, true];
     if (bn % b7 === b0)
         return [bn === b7, true];
+    if (typeof BigInt === 'function') { // Baillie-PSW
+        if (millerRabinTests.get(2)(bn) === false)
+            return [false, true];
+        if (isLucasProbablePrime(bn) === false)
+            return [false, true];
+        if (!nmrt)
+            return [true,
+                bn < Math.pow(2, 64) || isMersennePrime(bn) !== undefined
+            ];
+    }
     for (const [p, test] of millerRabinTests.entries()) {
         // console.log(`p = ${p}, A014233.get(${p}) = ${A014233.get(p)}`);
         if (millerRabinTests.get(p)(bn) === false)
@@ -154,8 +267,7 @@ export function primarityTest(n, nmrt = 0) {
         if (bn < A014233.get(p))
             return [true, true];
     }
-    // check Mersenne Prime
-    const mp = isMersennePrime(bn);
+    const mp = isMersennePrime(bn); // check Mersenne Prime
     if (mp !== undefined)
         return [mp, true];
     // try more till n < (4 ** k) <=> k > log(n) / log(2) == lg(2) / 2;
@@ -196,14 +308,14 @@ export const isProbablyPrime = (n, nmrt = 0) => primarityTest(n, nmrt)[0];
  * @returns {anyint} the next prime number or `undefined` if not found
  */
 export function nextPrime(n, unsure = false, nmrt = 0) {
-    const ctor = n.constructor;
-    const [zero, one, two] = [ctor(0), ctor(1), ctor(2)];
+    const $ = n.constructor;
+    const [zero, one, two] = [$(0), $(1), $(2)];
     let bp = n < two ? two
         : typeof n === 'number' && !Number.isInteger(n)
-            ? ctor(Math.ceil(n))
-            : ctor(n) + one;
+            ? $(Math.ceil(n))
+            : $(n) + one;
     if (bp === two)
-        return ctor(two);
+        return $(two);
     if (bp % two === zero)
         bp++;
     while (true) {
@@ -211,7 +323,7 @@ export function nextPrime(n, unsure = false, nmrt = 0) {
         if (!sure && !unsure)
             return undefined;
         if (prime)
-            return ctor(bp);
+            return $(bp);
         bp += two;
     }
 }
@@ -227,13 +339,13 @@ export const nextPseudoPrime = (n, nmrt = 0) => nextPrime(n, true, nmrt);
 export function previousPrime(n, unsure = false, nmrt = 0) {
     if (n < 2)
         return undefined;
-    const ctor = n.constructor;
-    const [zero, one, two] = [ctor(0), ctor(1), ctor(2)];
+    const $ = n.constructor;
+    const [zero, one, two] = [$(0), $(1), $(2)];
     let bp = typeof n === 'number' && !Number.isInteger(n)
-        ? ctor(Math.floor(n))
-        : ctor(n) - one;
+        ? $(Math.floor(n))
+        : $(n) - one;
     if (bp === two)
-        return ctor(two);
+        return $(two);
     if (bp % two === zero)
         bp--;
     while (2 <= bp) {
@@ -241,7 +353,7 @@ export function previousPrime(n, unsure = false, nmrt = 0) {
         if (!sure && !unsure)
             return undefined;
         if (prime)
-            return ctor(bp);
+            return $(bp);
         bp -= two;
     }
     return undefined;
@@ -253,8 +365,8 @@ export const previousPseudoPrime = (n, nmrt = 0) => previousPrime(n, true, nmrt)
  * If `n` is omitted, it returns an infinite iterator.
  */
 export function* primes(n = Number.POSITIVE_INFINITY) {
-    const ctor = n.constructor;
-    for (let p = ctor(2), i = 0; i < n; i++, p = nextPrime(p))
+    const $ = n.constructor;
+    for (let p = $(2), i = 0; i < n; i++, p = nextPrime(p))
         yield p;
 }
 /**
