@@ -39,13 +39,21 @@ export declare function isMersennePrime(n: anyint): boolean;
  * @param {number} nmrt maximum number of Miller-Rabin Tests to apply
  * @returns {boolean[]} `[primarity, certaininty]`
  */
-export declare function isProbablyPrime(n: anyint, nmrt?: number): (number | boolean)[];
+export declare function primarityTest(n: anyint, nmrt?: number): (number | boolean)[];
 /**
  * Checks if `n` is a prime.  If not certain throws a `RangeError`.
- * If you want to check what hass happen
- * @param {anyint} n integer to check primarity
+ * @param {anyint} n integer to check
  */
 export declare function isPrime(n: anyint): number | boolean;
+/**
+ * Checks if `n` is a strong psudoprime.
+ * Unlinke `isPrime()` it returns the result
+ * even when it is not certain `n` is truly a prime.
+ * To check if the result was certain, use `primarityTest()` instead.
+ *
+ * @param {anyint} n integer to check
+ */
+export declare const isProbablyPrime: (n: anyint, nmrt?: number) => number | boolean;
 /**
  * find the next prime.
  *
@@ -55,6 +63,7 @@ export declare function isPrime(n: anyint): number | boolean;
  * @returns {anyint} the next prime number or `undefined` if not found
  */
 export declare function nextPrime(n: anyint, unsure?: boolean, nmrt?: number): anyint;
+export declare const nextPseudoPrime: (n: anyint, nmrt?: number) => number | bigint;
 /**
  * find the previous prime.
  *
@@ -64,6 +73,7 @@ export declare function nextPrime(n: anyint, unsure?: boolean, nmrt?: number): a
  * @returns {anyint} the previous prime number or `undefined` if not found
  */
 export declare function previousPrime(n: anyint, unsure?: boolean, nmrt?: number): anyint;
+export declare const previousPseudoPrime: (n: anyint, nmrt?: number) => number | bigint;
 /**
  * generates `n` primes.
  * If `n` is `BigInt`, generated primes are also `BigInt`.
@@ -74,4 +84,5 @@ export declare function primes(n?: number): Generator<any, void, unknown>;
  * generates primes where `begin <= p <= end`
  */
 export declare function primesBetween(begin?: anyint, end?: anyint, unsure?: boolean, nmrt?: number): any;
+export declare function pseudoPrimesBetween(begin?: anyint, end?: anyint, nmrt?: number): Generator<any, void, any>;
 export {};

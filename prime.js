@@ -128,7 +128,7 @@ export function isMersennePrime(n) {
  * @param {number} nmrt maximum number of Miller-Rabin Tests to apply
  * @returns {boolean[]} `[primarity, certaininty]`
  */
-export function isProbablyPrime(n, nmrt = 0) {
+export function primarityTest(n, nmrt = 0) {
     if (typeof n === 'number') {
         if (!Number.isInteger(n))
             return [false, true];
@@ -169,16 +169,24 @@ export function isProbablyPrime(n, nmrt = 0) {
 }
 /**
  * Checks if `n` is a prime.  If not certain throws a `RangeError`.
- * If you want to check what hass happen
- * @param {anyint} n integer to check primarity
+ * @param {anyint} n integer to check
  */
 export function isPrime(n) {
-    const [primarity, certainity] = isProbablyPrime(n);
+    const [primarity, certainity] = primarityTest(n);
     if (certainity)
         return primarity;
     throw RangeError(`${n} is probably${primarity ? ' ' : ' not '}a prime`
         + ' but not for sure.');
 }
+/**
+ * Checks if `n` is a strong psudoprime.
+ * Unlinke `isPrime()` it returns the result
+ * even when it is not certain `n` is truly a prime.
+ * To check if the result was certain, use `primarityTest()` instead.
+ *
+ * @param {anyint} n integer to check
+ */
+export const isProbablyPrime = (n, nmrt = 0) => primarityTest(n, nmrt)[0];
 /**
  * find the next prime.
  *
@@ -199,7 +207,7 @@ export function nextPrime(n, unsure = false, nmrt = 0) {
     if (bp % two === zero)
         bp++;
     while (true) {
-        const [prime, sure] = isProbablyPrime(bp, nmrt);
+        const [prime, sure] = primarityTest(bp, nmrt);
         if (!sure && !unsure)
             return undefined;
         if (prime)
@@ -207,6 +215,7 @@ export function nextPrime(n, unsure = false, nmrt = 0) {
         bp += two;
     }
 }
+export const nextPseudoPrime = (n, nmrt = 0) => nextPrime(n, true, nmrt);
 /**
  * find the previous prime.
  *
@@ -228,7 +237,7 @@ export function previousPrime(n, unsure = false, nmrt = 0) {
     if (bp % two === zero)
         bp--;
     while (2 <= bp) {
-        const [prime, sure] = isProbablyPrime(bp, nmrt);
+        const [prime, sure] = primarityTest(bp, nmrt);
         if (!sure && !unsure)
             return undefined;
         if (prime)
@@ -237,6 +246,7 @@ export function previousPrime(n, unsure = false, nmrt = 0) {
     }
     return undefined;
 }
+export const previousPseudoPrime = (n, nmrt = 0) => previousPrime(n, true, nmrt);
 /**
  * generates `n` primes.
  * If `n` is `BigInt`, generated primes are also `BigInt`.
@@ -258,4 +268,7 @@ export function* primesBetween(begin = 2, end = Number.POSITIVE_INFINITY, unsure
         yield p;
         p = nextPrime(p, unsure, nmrt);
     }
+}
+export function* pseudoPrimesBetween(begin = 2, end = Number.POSITIVE_INFINITY, nmrt = 0) {
+    yield* primesBetween(begin, end, true, nmrt);
 }
