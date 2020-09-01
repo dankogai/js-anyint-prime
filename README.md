@@ -14,7 +14,7 @@ import { isPrime, isProbablyPrime, primarityTest } from './prime.js';
 
 isPrime(53);  // true
 isPrime(57);  // false
-isPrime(07fffffff); // true;
+isPrime(0x7fffffff);    // true;
 isPrime(Number.MAX_SAFE_INTEGER);               // false
 isPrime(Number.MAX_SAFE_INTEGER + 1);           // exception
 isPrime(BigInt(Number.MAX_SAFE_INTEGER) + 1n);  // false
@@ -27,19 +27,24 @@ isProbablyPrime(18446744073709551629n); // true;
 ```
 
 ```javascript
-import { nextPrime, previousPrime } from './prime.js';
+import {
+  nextPrime, previousPrime,
+  nextPseudoPrime, previousPseudoPrime
+} from './prime.js';
 
 nextPrime(-1);                              // 2
 nextPrime(0xffffffff);                      // 4294967311 == 0x10000000f
 nextPrime(BigInt(Number.MAX_SAFE_INTEGER)); // 9007199254740997n
 nextPrime(1n << 64n);                       // undefined
 nextPrime(1n << 64n, true);                 // 18446744073709551629n == 0x1000000000000000dn
+nextPseudoPrime(1n << 64n);                 // 18446744073709551629n
 
 previousPrime(2);                           // undefined
 previousPrime(Number.MAX_SAFE_INTEGER);     // 9007199254740881
 previousPrime(1n << 64n);                   // 18446744073709551557n == 0xffffffffffffffc5n
 previousPrime(1n << 128n);                  // undefined
-previousPrime(1n << 128n, true)             // 340282366920938463463374607431768211297n
+previousPrime(1n << 128n, true);            // 340282366920938463463374607431768211297n
+previousPseudoPrime(1n << 128n);            // 340282366920938463463374607431768211297n
 ```
 
 ```javascript
